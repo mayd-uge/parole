@@ -17,19 +17,48 @@
    ============================================================ */
 
 :root{
+  color-scheme:light dark;
   --paper:#F1F3F2;
   --card:#FFFFFF;
   --ink:#16211D;
   --ink-soft:#5C6B65;
   --line:#D5DCD9;
+  --survol:#E6ECEA;
   --accent:#1F6F5C;
   --accent-ink:#FFFFFF;
   --alerte:#B23A3A;
   --focus:#0B5FBF;
+  --ecran-fond:#16211D;
+  --ecran-texte:#F3F7F5;
+  --ecran-vide:#8FA39C;
   --radius:14px;
-  --tap:76px;
+  --tap:4.4rem;
   --cat:var(--accent);
 }
+/* Mode sombre : suit le réglage Apparence de l'iPad */
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#111614;
+    --card:#1B221F;
+    --ink:#EDF2F0;
+    --ink-soft:#9AAAA3;
+    --line:#2E3A35;
+    --survol:#26302B;
+    --accent:#3FA58B;
+    --alerte:#D45A5A;
+    --focus:#6FB1FF;
+    --ecran-fond:#000000;
+    --ecran-texte:#F3F7F5;
+    --ecran-vide:#6E7F78;
+  }
+}
+/* Contraste renforcé : suit Accessibilité > Augmenter le contraste */
+@media (prefers-contrast:more){
+  :root{--line:#7A8A84;--ink-soft:#3D4A45}
+  .phrase,#fixes button,#rail button,#barre button,#sugg button{border-width:2px}
+}
+/* Taille de texte système (Dynamic Type) : la page suit Accessibilité > Taille du texte */
+html{font:-apple-system-body;-webkit-text-size-adjust:100%}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -38,7 +67,7 @@ body{
   background:var(--paper);
   color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  font-size:20px;
+  font-size:1.15rem;
   line-height:1.35;
   display:flex;
   flex-direction:column;
@@ -63,11 +92,11 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   min-height:96px;
   display:flex;align-items:center;justify-content:center;
   padding:14px 20px;
-  background:var(--ink);color:#F3F7F5;
+  background:var(--ecran-fond);color:var(--ecran-texte);
   text-align:center;
-  font-size:clamp(26px,4.4vw,44px);font-weight:600;letter-spacing:-0.01em;
+  font-size:clamp(1.5rem,4.4vw,2.6rem);font-weight:600;letter-spacing:-0.01em;
 }
-#ecran.vide{color:#8FA39C;font-weight:400;font-size:20px;letter-spacing:0}
+#ecran.vide{color:var(--ecran-vide);font-weight:400;font-size:1.1rem;letter-spacing:0}
 #ecran.parle{background:var(--accent)}
 #ecran.alerte{background:var(--alerte)}
 
@@ -80,9 +109,9 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 #fixes button{
   min-height:60px;border-radius:var(--radius);
   background:var(--paper);border:1px solid var(--line);
-  font-weight:600;font-size:21px;
+  font-weight:600;font-size:1.2rem;
 }
-#fixes button:active{background:var(--ink);color:#fff;border-color:var(--ink)}
+#fixes button:active{background:var(--ink);color:var(--card);border-color:var(--ink)}
 
 /* ---------- Catégories ---------- */
 #rail{
@@ -108,7 +137,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .phrase{
   min-height:var(--tap);padding:16px 18px;
   background:var(--card);border:1px solid var(--line);border-left:6px solid var(--cat);
-  border-radius:var(--radius);text-align:left;font-size:21px;
+  border-radius:var(--radius);text-align:left;font-size:1.2rem;
   display:flex;align-items:center;
 }
 .phrase:active{background:var(--cat);color:#fff;border-color:var(--cat)}
@@ -123,7 +152,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 #sugg.actif{display:flex}
 #sugg button{
   flex:0 0 auto;min-height:52px;padding:10px 16px;border-radius:999px;
-  background:var(--paper);border:1px solid var(--line);font-size:19px;white-space:nowrap;max-width:70vw;overflow:hidden;text-overflow:ellipsis;
+  background:var(--paper);border:1px solid var(--line);font-size:1.1rem;white-space:nowrap;max-width:70vw;overflow:hidden;text-overflow:ellipsis;
 }
 #sugg button:active{background:var(--accent);color:#fff}
 
@@ -136,41 +165,43 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 #sugg.actif + #barre{border-top:0}
 #saisie{
   flex:1 1 auto;min-width:0;min-height:64px;padding:12px 16px;
-  font:inherit;font-size:21px;color:var(--ink);
+  font:inherit;font-size:1.2rem;color:var(--ink);
   background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
 }
 #barre button{
   flex:0 0 auto;min-height:64px;padding:0 18px;border-radius:var(--radius);
   font-weight:600;background:var(--paper);border:1px solid var(--line);
 }
-#dire{background:var(--accent);color:#fff;border-color:var(--accent);padding:0 26px}
+#dire{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:0 26px}
 #stop{color:var(--alerte)}
-#appel{background:var(--alerte);color:#fff;border-color:var(--alerte)}
-#appel.actif{animation:pulse 1s infinite}
+/* Appel : contour rouge et pictogramme, distinct du bouton plein Dire */
+#appel{margin-left:auto;background:transparent;color:var(--alerte);border:2px solid var(--alerte);font-weight:700}
+#appel::before{content:"\26A0\FE0E";margin-right:8px}
+#appel.actif{animation:pulse 1s infinite;background:var(--alerte);color:#fff}
 @keyframes pulse{50%{opacity:.55}}
 
 /* ---------- Réglages ---------- */
 #reglages{position:fixed;inset:0;background:rgba(10,20,17,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
 #reglages.ouvert{display:flex}
-#panneau{background:var(--card);border-radius:18px;padding:24px;width:min(560px,100%);max-height:86vh;overflow-y:auto}
-#panneau h2{margin:0 0 18px;font-size:24px}
+#panneau{background:var(--card);color:var(--ink);border-radius:18px;padding:24px;width:min(560px,100%);max-height:86vh;overflow-y:auto}
+#panneau h2{margin:0 0 18px;font-size:1.4rem}
 .champ{margin-bottom:20px}
 .champ label{display:block;margin-bottom:8px;font-weight:600}
-.champ select,.champ input[type=range]{width:100%;font:inherit;font-size:19px}
+.champ select,.champ input[type=range]{width:100%;font:inherit;font-size:1.1rem}
 .champ select{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
-.aide{color:var(--ink-soft);font-size:16px;margin-top:6px}
+.aide{color:var(--ink-soft);font-size:.95rem;margin-top:6px}
 #fermer{width:100%;min-height:60px;background:var(--accent);color:#fff;border-radius:var(--radius);font-weight:600;margin-top:6px}
 
 /* ---------- Pointeur (Mac, iPad avec trackpad) ---------- */
 @media (hover:hover) and (pointer:fine){
-  .phrase:hover,#fixes button:hover,#sugg button:hover{background:#E6ECEA;border-color:#B9C4BF}
-  #rail button:hover:not([aria-selected="true"]){background:#E6ECEA}
+  .phrase:hover,#fixes button:hover,#sugg button:hover{background:var(--survol)}
+  #rail button:hover:not([aria-selected="true"]){background:var(--survol)}
   #barre button:hover{filter:brightness(.94)}
 }
 /* ---------- Écran étroit (iPad portrait, iPhone) ---------- */
 @media (max-width:600px){
   #fixes{grid-template-columns:repeat(5,1fr);gap:6px}
-  #fixes button{font-size:17px;padding:0 4px}
+  #fixes button{font-size:1rem;padding:0 4px}
   #barre button{padding:0 12px}
   #dire{padding:0 16px}
 }
@@ -224,7 +255,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* ============================================================
    CONTENU — c'est ici, et seulement ici, qu'on modifie les phrases.
    ============================================================ */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 /* Réponses toujours visibles, quelle que soit la catégorie ouverte. Cinq maximum. */
 const FIXES = ["Oui", "Non", "Attends", "Merci", "Répète"];
@@ -502,7 +533,11 @@ $('version').textContent = 'Parole — version ' + APP_VERSION;
 
 /* --- Hors ligne --- */
 if('serviceWorker' in navigator){
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  let recharge = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(recharge) return; recharge = true; location.reload();
+  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(()=>{}));
 }
 </script>
 </body>

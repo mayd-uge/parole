@@ -72,14 +72,15 @@ Schéma `X.Y.Z` :
 2. Incrémenter `APP_VERSION` dans `index.html` **et** `VERSION` dans `sw.js`, à l'identique.
 3. Ajouter une ligne au journal des versions ci-dessous.
 4. Commit sur la branche `main` → GitHub Pages redéploie automatiquement (1 à 2 minutes).
-5. Sur l'iPad : fermer complètement l'application, la rouvrir, la refermer, la rouvrir. Vérifier le numéro dans Réglages.
+5. Sur l'iPad : ouvrir l'application avec une connexion active ; elle se recharge d'elle-même sur la nouvelle version (depuis la 1.2.0). Vérifier le numéro dans Réglages.
 
-Si le numéro n'a pas été incrémenté, l'iPad continuera d'afficher l'ancienne version depuis son cache : c'est le piège classique.
+Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icône, manifest) peuvent rester en cache ; `index.html` est de toute façon rechargé depuis le réseau à chaque ouverture connectée.
 
 ### Journal des versions
 
 | Version | Date | Changements |
 |---|---|---|
+| 1.2.0 | 2026-09-10 | Suit les réglages système de l'iPad : mode clair/sombre (Apparence), contraste renforcé (Augmenter le contraste), taille de texte (Dynamic Type). Bouton Appel redessiné en contour rouge avec pictogramme, distinct du bouton plein Dire. Mise à jour automatique : `index.html` chargé réseau d'abord, rechargement dès qu'une nouvelle version prend le contrôle — plus besoin de fermer/rouvrir ni de purger le cache. |
 | 1.1.0 | 2026-09-10 | Bandeau de réponses fixes (`FIXES`). Bouton Répéter. Bouton Appel : signal sonore puis phrase `APPEL_TEXTE` en boucle jusqu'à l'arrêt. Suggestions à la frappe dès trois lettres (banque + récentes). Couleur par catégorie (`COULEURS`). Blindage tactile iOS (zoom, sélection, tirage). Survol au pointeur et largeur bornée pour Safari Mac / iPad paysage. |
 | 1.0.0 | 2026-09-10 | Première version publiée. Six catégories, saisie libre, onglet Récent, réglages voix/vitesse/taille, fonctionnement hors ligne, affichage du numéro de version. |
 
@@ -101,7 +102,7 @@ Si le numéro n'a pas été incrémenté, l'iPad continuera d'afficher l'ancienn
 
 Le dépôt peut être copié (« fork ») par toute personne souhaitant l'adapter à une autre situation. Il suffit de modifier le bloc `PHRASES`, d'activer GitHub Pages sur la copie, et d'ouvrir l'adresse obtenue dans Safari sur l'iPad, puis « Partager » → « Sur l'écran d'accueil ».
 
-Sur l'iPad, les voix disponibles dépendent de celles installées dans Réglages → Accessibilité → Contenu énoncé → Voix. Les modes d'accès du système (Contrôle de sélection, Adaptations tactiles, AssistiveTouch, Accès guidé) s'appliquent à l'application comme à toute page web.
+Sur l'iPad, les voix disponibles dépendent de celles installées dans Réglages → Accessibilité → Contenu énoncé → Voix. Les modes d'accès du système (Contrôle de sélection, Adaptations tactiles, AssistiveTouch, Accès guidé) s'appliquent à l'application comme à toute page web. L'application suit aussi l'apparence claire ou sombre, le réglage « Augmenter le contraste » et la taille de texte définie dans Accessibilité → Affichage et taille du texte.
 
 ---
 
