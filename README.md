@@ -26,7 +26,7 @@ Le fichier se lit de haut en bas en quatre zones :
 
 1. **`<style>`** — l'apparence (couleurs, tailles, disposition). Les variables en tête (`--accent`, `--tap`, etc.) pilotent l'essentiel.
 2. **Le HTML** — la structure : bandeau de lecture, rail des catégories, grille, barre de saisie, panneau de réglages.
-3. **`APP_VERSION` et `PHRASES`** — le numéro de version, puis **le contenu**. C'est ici, et seulement ici, que l'on ajoute ou modifie des phrases.
+3. **Le contenu** — `APP_VERSION` (numéro de version), `FIXES` (les cinq réponses toujours visibles), `APPEL_TEXTE` (phrase du bouton Appel), `COULEURS` (teintes des catégories, dans l'ordre), puis `PHRASES`. C'est ici, et seulement ici, que l'on modifie ce que dit l'application.
 4. **La mécanique** — voix, affichage, saisie, réglages. Ne pas y toucher pour une simple modification de contenu.
 
 Format du bloc `PHRASES` :
@@ -44,6 +44,12 @@ const PHRASES = {
 ```
 
 Guillemets doubles, virgules entre les phrases et entre les catégories. Une apostrophe dans une phrase ne pose aucun problème.
+
+Les réponses fixes suivent le même principe, sans point final (il est ajouté à la prononciation) :
+
+```js
+const FIXES = ["Oui", "Non", "Attends", "Merci", "Répète"];
+```
 
 ---
 
@@ -74,6 +80,7 @@ Si le numéro n'a pas été incrémenté, l'iPad continuera d'afficher l'ancienn
 
 | Version | Date | Changements |
 |---|---|---|
+| 1.1.0 | 2026-09-10 | Bandeau de réponses fixes (`FIXES`). Bouton Répéter. Bouton Appel : signal sonore puis phrase `APPEL_TEXTE` en boucle jusqu'à l'arrêt. Suggestions à la frappe dès trois lettres (banque + récentes). Couleur par catégorie (`COULEURS`). Blindage tactile iOS (zoom, sélection, tirage). Survol au pointeur et largeur bornée pour Safari Mac / iPad paysage. |
 | 1.0.0 | 2026-09-10 | Première version publiée. Six catégories, saisie libre, onglet Récent, réglages voix/vitesse/taille, fonctionnement hors ligne, affichage du numéro de version. |
 
 ---
@@ -84,7 +91,7 @@ Si le numéro n'a pas été incrémenté, l'iPad continuera d'afficher l'ancienn
 
 **Aucune ressource externe.** La sûreté de l'application tient à ce qu'elle ne charge rien depuis internet : pas de police web, pas de bibliothèque hébergée ailleurs, pas de script tiers, pas d'appel réseau. Cette règle est ce qui permet d'affirmer que rien ne sort de l'iPad. Toute contribution qui l'enfreint doit être refusée.
 
-**Aucun stockage de données.** L'application n'enregistre rien (ni cookies, ni stockage local) : l'onglet Récent vit en mémoire et disparaît à la fermeture. Le seul cache est celui du service worker, qui ne contient que les fichiers du dépôt.
+**Aucun stockage de données, aucune transmission.** L'application n'enregistre rien (ni cookies, ni stockage local) et n'envoie rien : l'onglet Récent et la dernière phrase vivent en mémoire et disparaissent à la fermeture. Le seul cache est celui du service worker, qui ne contient que les fichiers du dépôt. Le bouton Appel produit son signal sonore par synthèse (Web Audio), sans fichier audio.
 
 **Un seul fichier applicatif.** `index.html` reste autonome. Découper le code en plusieurs fichiers rendrait l'audit et le partage plus difficiles sans bénéfice pour un projet de cette taille.
 

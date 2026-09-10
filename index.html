@@ -2,16 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Parole">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icone.png">
 <title>Parole</title>
 <style>
 /* ============================================================
    PAROLE — interface de communication
-   Tout tient dans ce seul fichier. Aucune connexion requise.
+   Tout tient dans ce seul fichier. Aucune ressource externe.
    Pour modifier les phrases : voir le bloc PHRASES plus bas.
    ============================================================ */
 
@@ -23,9 +24,11 @@
   --line:#D5DCD9;
   --accent:#1F6F5C;
   --accent-ink:#FFFFFF;
+  --alerte:#B23A3A;
   --focus:#0B5FBF;
   --radius:14px;
   --tap:76px;
+  --cat:var(--accent);
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -40,154 +43,160 @@ body{
   display:flex;
   flex-direction:column;
   overflow:hidden;
+  /* Blindage tactile : pas de zoom au double-appui, pas de tirage, pas de sélection */
+  touch-action:manipulation;
+  overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;
+  -webkit-touch-callout:none;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
 button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
-/* ---------- Bandeau de lecture (l'interlocuteur lit) ---------- */
+/* Largeur bornée sur grand écran (Mac, iPad paysage) */
+#app{flex:1 1 auto;display:flex;flex-direction:column;min-height:0;width:100%;max-width:1180px;margin:0 auto}
+
+/* ---------- Bandeau de lecture ---------- */
 #ecran{
   flex:0 0 auto;
   min-height:96px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   padding:14px 20px;
-  background:var(--ink);
-  color:#F3F7F5;
+  background:var(--ink);color:#F3F7F5;
   text-align:center;
-  font-size:clamp(26px,4.4vw,44px);
-  font-weight:600;
-  letter-spacing:-0.01em;
+  font-size:clamp(26px,4.4vw,44px);font-weight:600;letter-spacing:-0.01em;
 }
 #ecran.vide{color:#8FA39C;font-weight:400;font-size:20px;letter-spacing:0}
 #ecran.parle{background:var(--accent)}
+#ecran.alerte{background:var(--alerte)}
+
+/* ---------- Réponses fixes ---------- */
+#fixes{
+  flex:0 0 auto;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+  padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);
+}
+#fixes button{
+  min-height:60px;border-radius:var(--radius);
+  background:var(--paper);border:1px solid var(--line);
+  font-weight:600;font-size:21px;
+}
+#fixes button:active{background:var(--ink);color:#fff;border-color:var(--ink)}
 
 /* ---------- Catégories ---------- */
 #rail{
-  flex:0 0 auto;
-  display:flex;
-  gap:8px;
-  padding:10px 12px;
-  overflow-x:auto;
-  background:var(--card);
-  border-bottom:1px solid var(--line);
-  -webkit-overflow-scrolling:touch;
+  flex:0 0 auto;display:flex;gap:8px;padding:10px 12px;overflow-x:auto;
+  background:var(--card);border-bottom:1px solid var(--line);
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
 }
+#rail::-webkit-scrollbar{display:none}
 #rail button{
-  flex:0 0 auto;
-  padding:14px 22px;
-  border-radius:999px;
-  background:var(--paper);
-  border:1px solid var(--line);
-  font-weight:600;
-  white-space:nowrap;
-  min-height:56px;
+  flex:0 0 auto;padding:14px 22px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--line);
+  border-left:6px solid var(--cat);
+  font-weight:600;white-space:nowrap;min-height:56px;
 }
-#rail button[aria-selected="true"]{
-  background:var(--accent);
-  color:var(--accent-ink);
-  border-color:var(--accent);
-}
+#rail button[aria-selected="true"]{background:var(--cat);color:#fff;border-color:var(--cat)}
 
-/* ---------- Grille de phrases ---------- */
+/* ---------- Grille ---------- */
 #grille{
-  flex:1 1 auto;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-  gap:10px;
-  padding:12px;
-  align-content:start;
+  flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:10px;padding:12px;align-content:start;
 }
 .phrase{
-  min-height:var(--tap);
-  padding:16px 18px;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-left:6px solid var(--accent);
-  border-radius:var(--radius);
-  text-align:left;
-  font-size:21px;
-  display:flex;
-  align-items:center;
+  min-height:var(--tap);padding:16px 18px;
+  background:var(--card);border:1px solid var(--line);border-left:6px solid var(--cat);
+  border-radius:var(--radius);text-align:left;font-size:21px;
+  display:flex;align-items:center;
 }
-.phrase:active{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.phrase:active{background:var(--cat);color:#fff;border-color:var(--cat)}
 .vide-msg{grid-column:1/-1;padding:28px 6px;color:var(--ink-soft)}
+
+/* ---------- Suggestions ---------- */
+#sugg{
+  flex:0 0 auto;display:none;gap:8px;padding:8px 12px 0;overflow-x:auto;
+  background:var(--card);border-top:1px solid var(--line);scrollbar-width:none;
+}
+#sugg::-webkit-scrollbar{display:none}
+#sugg.actif{display:flex}
+#sugg button{
+  flex:0 0 auto;min-height:52px;padding:10px 16px;border-radius:999px;
+  background:var(--paper);border:1px solid var(--line);font-size:19px;white-space:nowrap;max-width:70vw;overflow:hidden;text-overflow:ellipsis;
+}
+#sugg button:active{background:var(--accent);color:#fff}
 
 /* ---------- Barre du bas ---------- */
 #barre{
-  flex:0 0 auto;
-  display:flex;
-  gap:8px;
+  flex:0 0 auto;display:flex;gap:8px;align-items:center;
   padding:10px 12px calc(10px + env(safe-area-inset-bottom));
-  background:var(--card);
-  border-top:1px solid var(--line);
-  align-items:center;
+  background:var(--card);border-top:1px solid var(--line);
 }
+#sugg.actif + #barre{border-top:0}
 #saisie{
-  flex:1 1 auto;
-  min-height:64px;
-  padding:12px 16px;
-  font:inherit;
-  font-size:21px;
-  color:var(--ink);
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
+  flex:1 1 auto;min-width:0;min-height:64px;padding:12px 16px;
+  font:inherit;font-size:21px;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
 }
 #barre button{
-  flex:0 0 auto;
-  min-height:64px;
-  padding:0 20px;
-  border-radius:var(--radius);
-  font-weight:600;
-  background:var(--paper);
-  border:1px solid var(--line);
+  flex:0 0 auto;min-height:64px;padding:0 18px;border-radius:var(--radius);
+  font-weight:600;background:var(--paper);border:1px solid var(--line);
 }
-#dire{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:0 28px}
-#stop{color:#8A2B2B}
+#dire{background:var(--accent);color:#fff;border-color:var(--accent);padding:0 26px}
+#stop{color:var(--alerte)}
+#appel{background:var(--alerte);color:#fff;border-color:var(--alerte)}
+#appel.actif{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
 
 /* ---------- Réglages ---------- */
-#reglages{
-  position:fixed;inset:0;
-  background:rgba(10,20,17,.55);
-  display:none;
-  align-items:center;justify-content:center;
-  padding:20px;
-  z-index:10;
-}
+#reglages{position:fixed;inset:0;background:rgba(10,20,17,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
 #reglages.ouvert{display:flex}
-#panneau{
-  background:var(--card);
-  border-radius:18px;
-  padding:24px;
-  width:min(560px,100%);
-  max-height:86vh;
-  overflow-y:auto;
-}
+#panneau{background:var(--card);border-radius:18px;padding:24px;width:min(560px,100%);max-height:86vh;overflow-y:auto}
 #panneau h2{margin:0 0 18px;font-size:24px}
 .champ{margin-bottom:20px}
 .champ label{display:block;margin-bottom:8px;font-weight:600}
 .champ select,.champ input[type=range]{width:100%;font:inherit;font-size:19px}
 .champ select{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
 .aide{color:var(--ink-soft);font-size:16px;margin-top:6px}
-#fermer{width:100%;min-height:60px;background:var(--accent);color:var(--accent-ink);border-radius:var(--radius);font-weight:600;margin-top:6px}
+#fermer{width:100%;min-height:60px;background:var(--accent);color:#fff;border-radius:var(--radius);font-weight:600;margin-top:6px}
+
+/* ---------- Pointeur (Mac, iPad avec trackpad) ---------- */
+@media (hover:hover) and (pointer:fine){
+  .phrase:hover,#fixes button:hover,#sugg button:hover{background:#E6ECEA;border-color:#B9C4BF}
+  #rail button:hover:not([aria-selected="true"]){background:#E6ECEA}
+  #barre button:hover{filter:brightness(.94)}
+}
+/* ---------- Écran étroit (iPad portrait, iPhone) ---------- */
+@media (max-width:600px){
+  #fixes{grid-template-columns:repeat(5,1fr);gap:6px}
+  #fixes button{font-size:17px;padding:0 4px}
+  #barre button{padding:0 12px}
+  #dire{padding:0 16px}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<div id="app">
 
-<div id="ecran" class="vide">Touchez une phrase pour la faire dire</div>
-<nav id="rail" role="tablist" aria-label="Catégories"></nav>
-<main id="grille" role="tabpanel" aria-label="Phrases"></main>
+  <div id="ecran" class="vide">Touchez une phrase pour la faire dire</div>
 
-<div id="barre">
-  <input id="saisie" type="text" placeholder="Écrire une phrase…" autocomplete="off" autocorrect="on" enterkeyhint="send">
-  <button id="dire">Dire</button>
-  <button id="stop" aria-label="Arrêter la voix">Stop</button>
-  <button id="ouvrir" aria-label="Réglages">Réglages</button>
+  <div id="fixes" aria-label="Réponses rapides"></div>
+
+  <nav id="rail" role="tablist" aria-label="Catégories"></nav>
+  <main id="grille" role="tabpanel" aria-label="Phrases"></main>
+
+  <div id="sugg" aria-label="Suggestions"></div>
+  <div id="barre">
+    <input id="saisie" type="text" placeholder="Écrire une phrase…" autocomplete="off" autocorrect="on" enterkeyhint="send">
+    <button id="dire">Dire</button>
+    <button id="repeter" aria-label="Répéter la dernière phrase">Répéter</button>
+    <button id="stop" aria-label="Arrêter la voix">Stop</button>
+    <button id="appel" aria-label="Appeler à l'aide">Appel</button>
+    <button id="ouvrir" aria-label="Réglages">⚙︎</button>
+  </div>
+
 </div>
 
 <div id="reglages" role="dialog" aria-modal="true" aria-labelledby="titre-reglages">
@@ -213,11 +222,18 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
 <script>
 /* ============================================================
-   PHRASES — c'est ici, et seulement ici, qu'on modifie le contenu.
-   Une catégorie = un titre entre guillemets, puis ses phrases.
-   Ajouter, supprimer, réécrire librement. Garder les virgules.
+   CONTENU — c'est ici, et seulement ici, qu'on modifie les phrases.
    ============================================================ */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
+
+/* Réponses toujours visibles, quelle que soit la catégorie ouverte. Cinq maximum. */
+const FIXES = ["Oui", "Non", "Attends", "Merci", "Répète"];
+
+/* Phrase prononcée en boucle par le bouton Appel, précédée d'un signal sonore. */
+const APPEL_TEXTE = "J'ai besoin d'aide, s'il vous plaît.";
+
+/* Couleurs des catégories, attribuées dans l'ordre. Ajouter des teintes si plus de six catégories. */
+const COULEURS = ["#1F6F5C", "#2F5D9E", "#7A4A8C", "#B0562E", "#8C6A12", "#3F7A2E"];
 
 const PHRASES = {
   "Essentiel": [
@@ -302,17 +318,17 @@ const PHRASES = {
    Mécanique — rien à modifier en dessous de cette ligne.
    ============================================================ */
 const synth = window.speechSynthesis;
-const ecran = document.getElementById('ecran');
-const rail = document.getElementById('rail');
-const grille = document.getElementById('grille');
-const saisie = document.getElementById('saisie');
-const selVoix = document.getElementById('voix');
-const rVitesse = document.getElementById('vitesse');
-const rTaille = document.getElementById('taille');
+const $ = id => document.getElementById(id);
+const ecran = $('ecran'), rail = $('rail'), grille = $('grille'), saisie = $('saisie');
+const fixes = $('fixes'), sugg = $('sugg');
+const selVoix = $('voix'), rVitesse = $('vitesse'), rTaille = $('taille');
 
 let voixDispo = [];
 let recentes = [];
+let derniere = '';
 let categorieActive = Object.keys(PHRASES)[0];
+let appelTimer = null;
+let audioCtx = null;
 
 /* --- Voix --- */
 function chargerVoix(){
@@ -321,8 +337,7 @@ function chargerVoix(){
   selVoix.innerHTML = '';
   voixDispo.forEach((v,i) => {
     const o = document.createElement('option');
-    o.value = i;
-    o.textContent = v.name + (v.lang ? ' — ' + v.lang : '');
+    o.value = i; o.textContent = v.name + (v.lang ? ' — ' + v.lang : '');
     selVoix.appendChild(o);
   });
 }
@@ -330,35 +345,80 @@ chargerVoix();
 if(typeof synth.onvoiceschanged !== 'undefined') synth.onvoiceschanged = chargerVoix;
 
 /* --- Parler --- */
-function parler(texte){
-  if(!texte || !texte.trim()) return;
-  texte = texte.trim();
+function prononcer(texte, alerte){
   synth.cancel();
   const u = new SpeechSynthesisUtterance(texte);
   const v = voixDispo[selVoix.value];
   if(v){ u.voice = v; u.lang = v.lang; } else { u.lang = 'fr-FR'; }
   u.rate = parseFloat(rVitesse.value);
-  u.onstart = () => ecran.classList.add('parle');
-  u.onend = () => ecran.classList.remove('parle');
-  u.onerror = () => ecran.classList.remove('parle');
-  ecran.textContent = texte;
-  ecran.classList.remove('vide');
+  u.onstart = () => ecran.classList.add(alerte ? 'alerte' : 'parle');
+  u.onend = u.onerror = () => { if(!appelTimer) ecran.classList.remove('parle','alerte'); };
+  ecran.textContent = texte; ecran.classList.remove('vide');
   synth.speak(u);
-  memoriser(texte);
 }
-
-function memoriser(texte){
+function parler(texte){
+  if(!texte || !texte.trim()) return;
+  texte = texte.trim();
+  if(appelTimer) arreterAppel();
+  prononcer(texte, false);
+  derniere = texte;
   recentes = [texte, ...recentes.filter(t => t !== texte)].slice(0,14);
   if(categorieActive === 'Récent') afficher('Récent');
 }
+function arreter(){
+  synth.cancel(); ecran.classList.remove('parle','alerte');
+  if(appelTimer) arreterAppel();
+}
+
+/* --- Appel --- */
+function carillon(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const t = audioCtx.currentTime;
+    [[880,0],[1175,0.18],[880,0.36]].forEach(([f,d]) => {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t+d);
+      g.gain.exponentialRampToValueAtTime(0.5, t+d+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+d+0.16);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t+d); o.stop(t+d+0.2);
+    });
+  }catch(e){}
+}
+function lancerAppel(){
+  if(appelTimer){ arreterAppel(); return; }
+  const cycle = () => { carillon(); setTimeout(() => prononcer(APPEL_TEXTE, true), 650); };
+  cycle();
+  appelTimer = setInterval(cycle, 6000);
+  $('appel').classList.add('actif');
+  ecran.classList.add('alerte');
+}
+function arreterAppel(){
+  clearInterval(appelTimer); appelTimer = null;
+  $('appel').classList.remove('actif');
+  synth.cancel(); ecran.classList.remove('alerte','parle');
+}
 
 /* --- Affichage --- */
-function construireRail(){
-  const noms = ['Récent', ...Object.keys(PHRASES)];
-  noms.forEach(nom => {
+function couleurDe(nom){
+  const i = Object.keys(PHRASES).indexOf(nom);
+  return i < 0 ? 'var(--accent)' : COULEURS[i % COULEURS.length];
+}
+function construireFixes(){
+  FIXES.slice(0,5).forEach(txt => {
     const b = document.createElement('button');
-    b.textContent = nom;
-    b.setAttribute('role','tab');
+    b.textContent = txt;
+    b.addEventListener('click', () => parler(txt.endsWith('.') ? txt : txt + '.'));
+    fixes.appendChild(b);
+  });
+}
+function construireRail(){
+  ['Récent', ...Object.keys(PHRASES)].forEach(nom => {
+    const b = document.createElement('button');
+    b.textContent = nom; b.setAttribute('role','tab');
+    b.style.setProperty('--cat', couleurDe(nom));
     b.setAttribute('aria-selected', nom === categorieActive ? 'true' : 'false');
     b.addEventListener('click', () => {
       categorieActive = nom;
@@ -368,60 +428,79 @@ function construireRail(){
     rail.appendChild(b);
   });
 }
-
 function afficher(nom){
   const liste = nom === 'Récent' ? recentes : (PHRASES[nom] || []);
-  grille.innerHTML = '';
-  grille.scrollTop = 0;
+  grille.innerHTML = ''; grille.scrollTop = 0;
+  grille.style.setProperty('--cat', couleurDe(nom));
   if(!liste.length){
-    const p = document.createElement('p');
-    p.className = 'vide-msg';
+    const p = document.createElement('p'); p.className = 'vide-msg';
     p.textContent = 'Les phrases dites récemment apparaîtront ici.';
-    grille.appendChild(p);
-    return;
+    grille.appendChild(p); return;
   }
   liste.forEach(txt => {
-    const b = document.createElement('button');
-    b.className = 'phrase';
-    b.textContent = txt;
+    const b = document.createElement('button'); b.className = 'phrase'; b.textContent = txt;
     b.addEventListener('click', () => parler(txt));
     grille.appendChild(b);
   });
 }
 
-/* --- Saisie libre --- */
-document.getElementById('dire').addEventListener('click', () => {
-  if(saisie.value.trim()){ parler(saisie.value); saisie.value = ''; }
-});
-saisie.addEventListener('keydown', e => {
-  if(e.key === 'Enter' && saisie.value.trim()){ parler(saisie.value); saisie.value = ''; }
-});
-document.getElementById('stop').addEventListener('click', () => {
-  synth.cancel(); ecran.classList.remove('parle');
-});
+/* --- Suggestions à la frappe --- */
+const normaliser = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const toutesPhrases = () => [...new Set([...recentes, ...Object.values(PHRASES).flat()])];
+function suggerer(){
+  const q = normaliser(saisie.value.trim());
+  sugg.innerHTML = '';
+  if(q.length < 3){ sugg.classList.remove('actif'); return; }
+  const hits = toutesPhrases().filter(p => normaliser(p).includes(q)).slice(0,5);
+  if(!hits.length){ sugg.classList.remove('actif'); return; }
+  hits.forEach(p => {
+    const b = document.createElement('button'); b.textContent = p;
+    b.addEventListener('click', () => { parler(p); saisie.value = ''; suggerer(); });
+    sugg.appendChild(b);
+  });
+  sugg.classList.add('actif');
+}
+saisie.addEventListener('input', suggerer);
+
+/* --- Saisie libre et boutons --- */
+function direSaisie(){ if(saisie.value.trim()){ parler(saisie.value); saisie.value = ''; suggerer(); } }
+$('dire').addEventListener('click', direSaisie);
+saisie.addEventListener('keydown', e => { if(e.key === 'Enter') direSaisie(); });
+$('repeter').addEventListener('click', () => { if(derniere) parler(derniere); });
+$('stop').addEventListener('click', arreter);
+$('appel').addEventListener('click', lancerAppel);
 
 /* --- Réglages --- */
-const modale = document.getElementById('reglages');
-document.getElementById('ouvrir').addEventListener('click', () => modale.classList.add('ouvert'));
-document.getElementById('fermer').addEventListener('click', () => modale.classList.remove('ouvert'));
+const modale = $('reglages');
+$('ouvrir').addEventListener('click', () => modale.classList.add('ouvert'));
+$('fermer').addEventListener('click', () => modale.classList.remove('ouvert'));
 modale.addEventListener('click', e => { if(e.target === modale) modale.classList.remove('ouvert'); });
-
 rVitesse.addEventListener('input', () => {
   const v = parseFloat(rVitesse.value);
-  document.getElementById('vitesse-val').textContent = v < 0.8 ? 'lente' : (v > 1.05 ? 'rapide' : 'normale');
+  $('vitesse-val').textContent = v < 0.8 ? 'lente' : (v > 1.05 ? 'rapide' : 'normale');
 });
 rTaille.addEventListener('input', () => {
   const px = rTaille.value;
   grille.style.gridTemplateColumns = `repeat(auto-fill,minmax(${px}px,1fr))`;
-  document.getElementById('taille-val').textContent = px < 260 ? 'moyenne' : (px < 350 ? 'grande' : 'très grande');
+  $('taille-val').textContent = px < 260 ? 'moyenne' : (px < 350 ? 'grande' : 'très grande');
 });
 
+/* --- Blindage : pincement et double-appui --- */
+document.addEventListener('gesturestart', e => e.preventDefault());
+let dernierTap = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if(now - dernierTap < 300 && e.target.tagName !== 'INPUT') e.preventDefault();
+  dernierTap = now;
+}, {passive:false});
+
 /* --- Démarrage --- */
+construireFixes();
 construireRail();
 afficher(categorieActive);
-document.getElementById('version').textContent = 'Parole — version ' + APP_VERSION;
+$('version').textContent = 'Parole — version ' + APP_VERSION;
 
-/* --- Fonctionnement hors ligne --- */
+/* --- Hors ligne --- */
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 }
