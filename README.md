@@ -24,7 +24,7 @@ Adresse de l'application : `https://mayd-uge.github.io/parole/`
 
 Le fichier se lit de haut en bas en quatre zones :
 
-1. **`<style>`** — l'apparence (couleurs, tailles, disposition). Les variables en tête (`--accent`, `--tap`, etc.) pilotent l'essentiel.
+1. **`<style>`** — l'apparence (couleurs, tailles, disposition). Les variables en tête (`--accent`, `--tap`, `--dire-fond`, etc.) pilotent l'essentiel ; le bloc sombre existe en deux exemplaires identiques (système et forcé), à modifier ensemble.
 2. **Le HTML** — la structure : bandeau de lecture, rail des catégories, grille, barre de saisie, panneau de réglages.
 3. **Le contenu** — `APP_VERSION` (numéro de version), `FIXES` (les cinq réponses toujours visibles), `APPEL_TEXTE` (phrase du bouton Appel), `COULEURS` (teintes des catégories, dans l'ordre), puis `PHRASES`. C'est ici, et seulement ici, que l'on modifie ce que dit l'application.
 4. **La mécanique** — voix, affichage, saisie, réglages. Ne pas y toucher pour une simple modification de contenu.
@@ -80,6 +80,7 @@ Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icôn
 
 | Version | Date | Changements |
 |---|---|---|
+| 1.3.0 | 2026-09-10 | Touche Dire ton sur ton avec la barre (variable `--dire-fond`, en gras). Apparence forçable : sélecteur Automatique / Claire / Sombre dans les Réglages (valable pour la session) et paramètre d'adresse `?theme=sombre` ou `?theme=clair` pour figer le choix dans l'icône de l'écran d'accueil. Sans paramètre, l'application continue de suivre l'Apparence de l'iPad. |
 | 1.2.0 | 2026-09-10 | Suit les réglages système de l'iPad : mode clair/sombre (Apparence), contraste renforcé (Augmenter le contraste), taille de texte (Dynamic Type). Bouton Appel redessiné en contour rouge avec pictogramme, distinct du bouton plein Dire. Mise à jour automatique : `index.html` chargé réseau d'abord, rechargement dès qu'une nouvelle version prend le contrôle — plus besoin de fermer/rouvrir ni de purger le cache. |
 | 1.1.0 | 2026-09-10 | Bandeau de réponses fixes (`FIXES`). Bouton Répéter. Bouton Appel : signal sonore puis phrase `APPEL_TEXTE` en boucle jusqu'à l'arrêt. Suggestions à la frappe dès trois lettres (banque + récentes). Couleur par catégorie (`COULEURS`). Blindage tactile iOS (zoom, sélection, tirage). Survol au pointeur et largeur bornée pour Safari Mac / iPad paysage. |
 | 1.0.0 | 2026-09-10 | Première version publiée. Six catégories, saisie libre, onglet Récent, réglages voix/vitesse/taille, fonctionnement hors ligne, affichage du numéro de version. |
@@ -103,6 +104,8 @@ Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icôn
 Le dépôt peut être copié (« fork ») par toute personne souhaitant l'adapter à une autre situation. Il suffit de modifier le bloc `PHRASES`, d'activer GitHub Pages sur la copie, et d'ouvrir l'adresse obtenue dans Safari sur l'iPad, puis « Partager » → « Sur l'écran d'accueil ».
 
 Sur l'iPad, les voix disponibles dépendent de celles installées dans Réglages → Accessibilité → Contenu énoncé → Voix. Les modes d'accès du système (Contrôle de sélection, Adaptations tactiles, AssistiveTouch, Accès guidé) s'appliquent à l'application comme à toute page web. L'application suit aussi l'apparence claire ou sombre, le réglage « Augmenter le contraste » et la taille de texte définie dans Accessibilité → Affichage et taille du texte.
+
+Pour imposer un thème quel que soit le réglage de l'iPad, ouvrir `https://mayd-uge.github.io/parole/?theme=sombre` (ou `?theme=clair`) dans Safari **avant** « Sur l'écran d'accueil » : l'icône conserve le paramètre. L'application ne mémorisant rien, le sélecteur des Réglages n'agit que le temps de la session.
 
 ---
 

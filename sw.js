@@ -7,7 +7,7 @@
    - autres fichiers : cache d'abord, réseau en secours.
    Combinée au rechargement automatique côté page, toute publication
    est appliquée sur l'iPad dès la prochaine ouverture connectée. */
-const VERSION = 'parole-1.2.0';
+const VERSION = 'parole-1.3.0';
 const FICHIERS = ['./', './index.html', './manifest.webmanifest', './icone.png'];
 
 self.addEventListener('install', e => {

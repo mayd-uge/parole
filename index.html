@@ -34,10 +34,12 @@
   --radius:14px;
   --tap:4.4rem;
   --cat:var(--accent);
+  --dire-fond:#DCE4E1;
 }
-/* Mode sombre : suit le réglage Apparence de l'iPad */
+/* Mode sombre : suit l'Apparence de l'iPad par défaut ; forçable par le sélecteur
+   des Réglages ou par ?theme=sombre / ?theme=clair dans l'adresse. */
 @media (prefers-color-scheme:dark){
-  :root{
+  :root:not([data-theme="clair"]){
     --paper:#111614;
     --card:#1B221F;
     --ink:#EDF2F0;
@@ -50,7 +52,23 @@
     --ecran-fond:#000000;
     --ecran-texte:#F3F7F5;
     --ecran-vide:#6E7F78;
+    --dire-fond:#2A3530;
   }
+}
+:root[data-theme="sombre"]{
+    --paper:#111614;
+    --card:#1B221F;
+    --ink:#EDF2F0;
+    --ink-soft:#9AAAA3;
+    --line:#2E3A35;
+    --survol:#26302B;
+    --accent:#3FA58B;
+    --alerte:#D45A5A;
+    --focus:#6FB1FF;
+    --ecran-fond:#000000;
+    --ecran-texte:#F3F7F5;
+    --ecran-vide:#6E7F78;
+    --dire-fond:#2A3530;
 }
 /* Contraste renforcé : suit Accessibilité > Augmenter le contraste */
 @media (prefers-contrast:more){
@@ -172,7 +190,8 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   flex:0 0 auto;min-height:64px;padding:0 18px;border-radius:var(--radius);
   font-weight:600;background:var(--paper);border:1px solid var(--line);
 }
-#dire{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:0 26px}
+/* Dire : ton sur ton avec la barre, en gras pour rester repérable */
+#dire{background:var(--dire-fond);color:var(--ink);border-color:var(--dire-fond);font-weight:700;padding:0 26px}
 #stop{color:var(--alerte)}
 /* Appel : contour rouge et pictogramme, distinct du bouton plein Dire */
 #appel{margin-left:auto;background:transparent;color:var(--alerte);border:2px solid var(--alerte);font-weight:700}
@@ -239,6 +258,15 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
       <p class="aide">Pour ajouter des voix : Réglages de l'iPad, Accessibilité, Contenu énoncé, Voix.</p>
     </div>
     <div class="champ">
+      <label for="apparence">Apparence</label>
+      <select id="apparence">
+        <option value="auto">Automatique (suit l'iPad)</option>
+        <option value="clair">Claire</option>
+        <option value="sombre">Sombre</option>
+      </select>
+      <p class="aide">Pour figer un choix : ajouter ?theme=sombre ou ?theme=clair à l'adresse avant « Sur l'écran d'accueil ».</p>
+    </div>
+    <div class="champ">
       <label for="vitesse">Vitesse — <span id="vitesse-val">normale</span></label>
       <input id="vitesse" type="range" min="0.5" max="1.3" step="0.05" value="0.95">
     </div>
@@ -255,7 +283,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 /* ============================================================
    CONTENU — c'est ici, et seulement ici, qu'on modifie les phrases.
    ============================================================ */
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 
 /* Réponses toujours visibles, quelle que soit la catégorie ouverte. Cinq maximum. */
 const FIXES = ["Oui", "Non", "Attends", "Merci", "Répète"];
@@ -524,6 +552,16 @@ document.addEventListener('touchend', e => {
   if(now - dernierTap < 300 && e.target.tagName !== 'INPUT') e.preventDefault();
   dernierTap = now;
 }, {passive:false});
+
+/* --- Apparence --- */
+const selApparence = $('apparence');
+function appliquerTheme(t){
+  if(t === 'clair' || t === 'sombre') document.documentElement.setAttribute('data-theme', t);
+  else document.documentElement.removeAttribute('data-theme');
+  selApparence.value = (t === 'clair' || t === 'sombre') ? t : 'auto';
+}
+selApparence.addEventListener('change', () => appliquerTheme(selApparence.value));
+appliquerTheme(new URLSearchParams(location.search).get('theme'));
 
 /* --- Démarrage --- */
 construireFixes();
