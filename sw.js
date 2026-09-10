@@ -1,7 +1,8 @@
 /* Parole — cache hors ligne.
-   Après modification de index.html, changer le numéro de version
-   ci-dessous (v1 -> v2) pour forcer la mise à jour sur l'iPad. */
-const VERSION = 'parole-v1';
+   VERSION doit reprendre le numéro APP_VERSION de index.html.
+   Toute modification du dépôt = incrémenter les deux, sinon
+   l'iPad conserve l'ancienne version en cache. */
+const VERSION = 'parole-1.0.0';
 const FICHIERS = ['./', './index.html', './manifest.webmanifest', './icone.png'];
 
 self.addEventListener('install', e => {

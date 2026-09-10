@@ -207,6 +207,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
       <input id="taille" type="range" min="200" max="420" step="20" value="230">
     </div>
     <button id="fermer">Fermer</button>
+    <p class="aide" id="version" style="text-align:center;margin:14px 0 0"></p>
   </div>
 </div>
 
@@ -216,6 +217,8 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
    Une catégorie = un titre entre guillemets, puis ses phrases.
    Ajouter, supprimer, réécrire librement. Garder les virgules.
    ============================================================ */
+const APP_VERSION = '1.0.0';
+
 const PHRASES = {
   "Essentiel": [
     "Oui.",
@@ -416,6 +419,7 @@ rTaille.addEventListener('input', () => {
 /* --- Démarrage --- */
 construireRail();
 afficher(categorieActive);
+document.getElementById('version').textContent = 'Parole — version ' + APP_VERSION;
 
 /* --- Fonctionnement hors ligne --- */
 if('serviceWorker' in navigator){
