@@ -26,7 +26,7 @@ Le fichier se lit de haut en bas en quatre zones :
 
 1. **`<style>`** — l'apparence (couleurs, tailles, disposition). Les variables en tête (`--accent`, `--tap`, `--dire-fond`, etc.) pilotent l'essentiel ; le bloc sombre existe en deux exemplaires identiques (système et forcé), à modifier ensemble.
 2. **Le HTML** — la structure : bandeau de lecture, rail des catégories, grille, barre de saisie, panneau de réglages.
-3. **Le contenu** — `APP_VERSION` (numéro de version), `FIXES` (les cinq réponses toujours visibles), `APPEL_TEXTE` (phrase du bouton Appel), `COULEURS` (teintes des catégories, dans l'ordre), puis `PHRASES`. C'est ici, et seulement ici, que l'on modifie ce que dit l'application.
+3. **Le contenu** — `APP_VERSION` (numéro de version), `FIXES` (les cinq réponses toujours visibles), `APPEL_TEXTE` (phrase du bouton Appel), `CATEGORIE_LIBRE` (catégorie proposée en premier au moment de garder une phrase), `COULEURS` (teintes des catégories, dans l'ordre), puis `PHRASES`. C'est ici, et seulement ici, que l'on modifie ce que dit l'application.
 4. **La mécanique** — voix, affichage, saisie, réglages. Ne pas y toucher pour une simple modification de contenu.
 
 Format du bloc `PHRASES` :
@@ -80,10 +80,64 @@ Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icôn
 
 | Version | Date | Changements |
 |---|---|---|
+| 1.4.0 | 2026-10-08 | Phrases enregistrées par l'utilisateur : bouton **Garder** sur la saisie libre (choix de la catégorie, ou « Mes phrases »), affichage dans la grille avec bordure pointillée, prise en compte dans les suggestions, suppression par appui long. Réglages : compteur, **Exporter** (ouvre Mail avec les phrases au format du bloc `PHRASES`, destinataire pré-rempli via `?export=`) et **Effacer**. Purge automatique des phrases locales reprises dans le dépôt. Règle « aucun stockage » amendée : stockage local sur l'appareil autorisé, aucune transmission. |
 | 1.3.0 | 2026-09-10 | Touche Dire ton sur ton avec la barre (variable `--dire-fond`, en gras). Apparence forçable : sélecteur Automatique / Claire / Sombre dans les Réglages (valable pour la session) et paramètre d'adresse `?theme=sombre` ou `?theme=clair` pour figer le choix dans l'icône de l'écran d'accueil. Sans paramètre, l'application continue de suivre l'Apparence de l'iPad. |
 | 1.2.0 | 2026-09-10 | Suit les réglages système de l'iPad : mode clair/sombre (Apparence), contraste renforcé (Augmenter le contraste), taille de texte (Dynamic Type). Bouton Appel redessiné en contour rouge avec pictogramme, distinct du bouton plein Dire. Mise à jour automatique : `index.html` chargé réseau d'abord, rechargement dès qu'une nouvelle version prend le contrôle — plus besoin de fermer/rouvrir ni de purger le cache. |
 | 1.1.0 | 2026-09-10 | Bandeau de réponses fixes (`FIXES`). Bouton Répéter. Bouton Appel : signal sonore puis phrase `APPEL_TEXTE` en boucle jusqu'à l'arrêt. Suggestions à la frappe dès trois lettres (banque + récentes). Couleur par catégorie (`COULEURS`). Blindage tactile iOS (zoom, sélection, tirage). Survol au pointeur et largeur bornée pour Safari Mac / iPad paysage. |
 | 1.0.0 | 2026-09-10 | Première version publiée. Six catégories, saisie libre, onglet Récent, réglages voix/vitesse/taille, fonctionnement hors ligne, affichage du numéro de version. |
+
+---
+
+## Phrases enregistrées par l'utilisateur et retour au dépôt
+
+Le dépôt reste la **source de vérité**. L'iPad peut enregistrer des phrases pour l'usage immédiat, mais elles ne deviennent pérennes qu'une fois reprises dans `index.html`. Le circuit est en trois temps.
+
+### Sur l'iPad
+
+- **Garder** : taper une phrase dans la saisie libre, toucher *Garder*, choisir la catégorie (ou « Mes phrases »). La phrase apparaît dans la grille avec une bordure pointillée et une pastille, et compte dans les suggestions. Une phrase déjà présente dans le dépôt est refusée.
+- **Supprimer** : appui long sur une phrase enregistrée, puis confirmer. Les phrases du dépôt ne sont pas supprimables depuis l'iPad.
+- **Exporter** (Réglages) : ouvre Mail avec objet et corps pré-remplis ; il ne reste qu'à toucher *Envoyer*. Le destinataire est pré-rempli si l'adresse de l'icône comporte le paramètre `export` (voir ci-dessous) ; sinon il est à saisir.
+- **Effacer** (Réglages) : vide toutes les phrases enregistrées, après confirmation.
+
+### Configurer le destinataire de l'export
+
+L'adresse de courriel ne figure pas dans le dépôt (contenu impersonnel). Elle se passe par l'adresse de l'icône, comme le thème : ouvrir dans Safari
+
+```
+https://mayd-uge.github.io/parole/?export=ADRESSE
+```
+
+(en remplaçant `ADRESSE` par le courriel de la personne qui maintient le dépôt, et en combinant au besoin avec le thème : `?theme=sombre&export=ADRESSE`), puis « Partager » → « Sur l'écran d'accueil ». L'icône conserve le paramètre. Un compte mail doit être configuré dans l'app Mail de l'iPad.
+
+### Format exporté
+
+Le corps du mail est directement au format du bloc `PHRASES` :
+
+```
+/* Parole 1.4.0 — phrases enregistrées sur l'appareil — 2026-10-08 */
+"Confort": [
+  "Peux-tu remonter le dossier ?",
+  "La couverture glisse."
+],
+"Mes phrases": [
+  "On regarde le match ce soir ?"
+],
+```
+
+### Intégration dans le dépôt et publication
+
+1. Ouvrir `index.html`, aller au bloc `PHRASES`.
+2. Pour chaque catégorie du mail : coller les phrases à la **fin de la liste existante** de cette catégorie (ajouter une virgule après la dernière phrase déjà présente). Une catégorie absente du dépôt (« Mes phrases ») se colle comme nouvelle entrée, en vérifiant la virgule avec l'entrée précédente et en retirant la virgule finale si c'est la dernière.
+3. Relire : reformuler si besoin, écarter ce qui est trop personnel (règle du contenu impersonnel), rattacher à une catégorie plus juste.
+4. Incrémenter `APP_VERSION` dans `index.html` **et** `VERSION` dans `sw.js` (ajout de phrases → troisième chiffre, ex. `1.4.0 → 1.4.1`).
+5. Ajouter la ligne au journal des versions.
+6. Commit sur `main` → GitHub Pages redéploie en 1 à 2 minutes.
+
+### Sur l'iPad, à l'ouverture suivante
+
+Rien à faire. L'application se met à jour, puis **retire d'elle-même** du stockage local toute phrase désormais présente dans le dépôt (comparaison insensible à la casse, aux accents et à la ponctuation finale). Les phrases non reprises restent locales et repartiront au prochain export.
+
+Rythme conseillé : un export toutes les deux semaines, cinq minutes de relecture, une version.
 
 ---
 
@@ -93,7 +147,7 @@ Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icôn
 
 **Aucune ressource externe.** La sûreté de l'application tient à ce qu'elle ne charge rien depuis internet : pas de police web, pas de bibliothèque hébergée ailleurs, pas de script tiers, pas d'appel réseau. Cette règle est ce qui permet d'affirmer que rien ne sort de l'iPad. Toute contribution qui l'enfreint doit être refusée.
 
-**Aucun stockage de données, aucune transmission.** L'application n'enregistre rien (ni cookies, ni stockage local) et n'envoie rien : l'onglet Récent et la dernière phrase vivent en mémoire et disparaissent à la fermeture. Le seul cache est celui du service worker, qui ne contient que les fichiers du dépôt. Le bouton Appel produit son signal sonore par synthèse (Web Audio), sans fichier audio.
+**Aucune transmission ; stockage uniquement sur l'appareil.** L'application n'envoie rien, nulle part. Depuis la 1.4.0, les phrases que l'utilisateur choisit de garder sont enregistrées dans le stockage local de Safari, sur l'iPad lui-même (clé `parole.locales.v1`) ; elles n'en sortent que par le geste explicite **Exporter**, qui ouvre l'app Mail — c'est l'utilisateur qui envoie. Tout le reste (onglet Récent, dernière phrase, réglages) vit en mémoire et disparaît à la fermeture. Le cache du service worker ne contient que les fichiers du dépôt. Le bouton Appel produit son signal sonore par synthèse (Web Audio), sans fichier audio. Safari peut purger le stockage local d'un site inutilisé pendant plusieurs semaines : l'export régulier est la sauvegarde.
 
 **Un seul fichier applicatif.** `index.html` reste autonome. Découper le code en plusieurs fichiers rendrait l'audit et le partage plus difficiles sans bénéfice pour un projet de cette taille.
 
@@ -104,6 +158,8 @@ Si le numéro de `sw.js` n'a pas été incrémenté, les fichiers annexes (icôn
 Le dépôt peut être copié (« fork ») par toute personne souhaitant l'adapter à une autre situation. Il suffit de modifier le bloc `PHRASES`, d'activer GitHub Pages sur la copie, et d'ouvrir l'adresse obtenue dans Safari sur l'iPad, puis « Partager » → « Sur l'écran d'accueil ».
 
 Sur l'iPad, les voix disponibles dépendent de celles installées dans Réglages → Accessibilité → Contenu énoncé → Voix. Les modes d'accès du système (Contrôle de sélection, Adaptations tactiles, AssistiveTouch, Accès guidé) s'appliquent à l'application comme à toute page web. L'application suit aussi l'apparence claire ou sombre, le réglage « Augmenter le contraste » et la taille de texte définie dans Accessibilité → Affichage et taille du texte.
+
+Le dépôt étant public, une famille qui fork le projet passe sa propre adresse d'export dans l'icône (voir plus haut) ; rien n'est à modifier dans le code pour cela.
 
 Pour imposer un thème quel que soit le réglage de l'iPad, ouvrir `https://mayd-uge.github.io/parole/?theme=sombre` (ou `?theme=clair`) dans Safari **avant** « Sur l'écran d'accueil » : l'icône conserve le paramètre. L'application ne mémorisant rien, le sélecteur des Réglages n'agit que le temps de la session.
 
